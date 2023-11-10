@@ -8,7 +8,7 @@ import scanpy as sc
 import numpy as np
 import pandas as pd
 
-adata_path = "./genespector/genespector/data/Buffy210208_processed_labelled_9Nov23.h5ad"
+adata_path = "./data/Buffy210208_processed_labelled_9Nov23.h5ad"
 
 adata = sc.read_h5ad(adata_path)
 

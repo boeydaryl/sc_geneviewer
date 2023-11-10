@@ -47,6 +47,5 @@ tenacity==8.2.2
 threadpoolctl==3.1.0
 tqdm==4.65.0
 umap-learn==0.5.3
-vcftoolz==1.2.0
 Werkzeug==2.2.3
 zipp==3.15.0
