@@ -7,8 +7,9 @@ from dash import Input, Output, dcc, html
 import scanpy as sc
 import numpy as np
 import pandas as pd
+import sys
 
-adata_path = "./data/Buffy210208_processed_labelled_9Nov23.h5ad"
+adata_path = sys.argv[1]
 
 adata = sc.read_h5ad(adata_path)
 
@@ -115,4 +116,4 @@ def update_UMAP(gene_var, cat_data, range_slider):
     return fig
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server()
