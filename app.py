@@ -17,14 +17,24 @@ app = dash.Dash(external_stylesheets=[dbc.themes.SLATE])
 
 gene_list = adata.raw.var_names.to_list()
 cat_list = adata.obs.columns.to_list()
+obsm_list = [X for X in adata.obsm]
 total_list = gene_list + cat_list
 df = sc.get.obs_df(adata, keys=total_list, use_raw=True)
-UMAP = adata.obsm['X_umap']
-x_coords = UMAP[:, 0]
-y_coords = UMAP[:, 1]
 
 controls = dbc.Card(
     [
+        html.Div(
+            [
+                dbc.Label("Latent Representation"),
+                dcc.RadioItems(
+                    id="Lat_rep",
+                    options=[
+                        {"label": col, "value": col} for col in obsm_list
+                    ],
+                    value="X_umap",
+                ),
+            ]
+        ),
         html.Div(
             [
                 dbc.Label("Gene"),
@@ -70,8 +80,12 @@ app.layout = dbc.Container(
         html.Div(children='Data Visualizer for doi: 10.1182/bloodadvances.2022006969', style={
         'textAlign': 'center',
         }),
-        dbc.Row(dbc.Col(dcc.Graph(id="cluster-graph"), md=5), align='center', className="h-85", justify='center'),
-        dbc.Row(dbc.Col(controls, md=2), align='start', className='h-15', justify='center'),
+        dbc.Row([dbc.Col(dcc.Graph(id="cluster-graph"), md=5), dbc.Col(controls, md=2)],
+                align='center',
+                className="h-85",
+                justify='center',
+                ),
+        #dbc.Row(, align='start', className='h-15', justify='center'),
         html.Div(children='Developed by Daryl Boey, Team Dahlin, Karolinska Institutet', style={
         'textAlign': 'center',
         })
@@ -82,12 +96,17 @@ app.layout = dbc.Container(
 
 @app.callback(
     Output("cluster-graph", "figure"),
+    Input("Lat_rep", "value"),
     Input("gene_var", "value"),
     Input("cat_data", "value"),
     Input("range_slider", "value")
 )
 
-def update_UMAP(gene_var, cat_data, range_slider):
+def update_graph(Lat_rep, gene_var, cat_data, range_slider):
+    rep = adata.obsm[Lat_rep]
+    x_coords = rep[:, 0]
+    y_coords = rep[:, 1]
+
     if gene_var in gene_list:
         vals = df[gene_var]
         fig = px.scatter(x=x_coords,
@@ -104,8 +123,8 @@ def update_UMAP(gene_var, cat_data, range_slider):
                          color=vals,
                          title=cat_data,)
     fig.update_layout(
-        xaxis_title="UMAP 1",
-        yaxis_title="UMAP2",
+        xaxis_title=str(Lat_rep + " 1"),
+        yaxis_title=str(Lat_rep + " 2"),
         font=dict(
             family="Courier New, monospace",
             size=16,),
@@ -116,4 +135,4 @@ def update_UMAP(gene_var, cat_data, range_slider):
     return fig
 
 if __name__ == "__main__":
-    app.run_server()
+    app.run_server(debug=True)
