@@ -76,8 +76,11 @@ controls = dbc.Card(
 
 app.layout = dbc.Container(
     [
-        html.H1("Wu, Boey, et al, 2022", style={'textAlign': 'center'}),
-        html.Div(children='Data Visualizer for doi: 10.1182/bloodadvances.2022006969', style={
+        html.H1("scGeneViewer", style={'textAlign': 'center'}),
+        html.Div(children=html.P([f"Data Visualizer for Wu C, Boey D, et al.", html.Br(),
+                                  f"Single-cell transcriptomics reveals the identity and regulators of human mast cell progenitors.", html.Br(),
+                                  f"Blood Adv. 2022;6(15):4439–4449. doi: 10.1182/bloodadvances.2022006969"]),
+                 style={
         'textAlign': 'center',
         }),
         dbc.Row([dbc.Col(dcc.Graph(id="cluster-graph"), md=5), dbc.Col(controls, md=2)],
@@ -85,7 +88,10 @@ app.layout = dbc.Container(
                 className="h-85",
                 justify='center',
                 ),
-        #dbc.Row(, align='start', className='h-15', justify='center'),
+        html.Div(children='Usage: Select either [Gene] or [Categorical Data], and clear the other field.', style={
+                'textAlign': 'center',
+                }),
+        html.Br(),
         html.Div(children='Developed by Daryl Boey, Team Dahlin, Karolinska Institutet', style={
         'textAlign': 'center',
         })
@@ -117,17 +123,31 @@ def update_graph(Lat_rep, gene_var, cat_data, range_slider):
                          title=gene_var,
                          opacity=0.5)
     if cat_data in cat_list:
-        vals = df[cat_data]
-        fig = px.scatter(x=x_coords,
-                         y=y_coords,
-                         color=vals,
-                         title=cat_data,)
+        if df[cat_data].dtype == 'category':
+            color_dict = sc.plotting._tools.scatterplots._get_palette(adata, cat_data)
+            vals = df[cat_data]
+            fig = px.scatter(x=x_coords,
+                             y=y_coords,
+                             color=vals,
+                             title=cat_data,
+                             color_discrete_map=color_dict
+                             )
+        else:
+            vals = df[cat_data]
+            fig = px.scatter(x=x_coords,
+                             y=y_coords,
+                             color=vals,
+                             title=cat_data,
+                             )
     fig.update_layout(
         xaxis_title=str(Lat_rep + " 1"),
         yaxis_title=str(Lat_rep + " 2"),
+        xaxis=dict(visible=False),
+        yaxis=dict(visible=False),
         font=dict(
-            family="Courier New, monospace",
-            size=16,),
+            family="Arial, monospace",
+            size=14,),
+        plot_bgcolor='rgba(0,0,0,0)'
     )
 
     fig.update_traces(marker=dict(size=5))
@@ -135,4 +155,4 @@ def update_graph(Lat_rep, gene_var, cat_data, range_slider):
     return fig
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False)
