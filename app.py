@@ -80,9 +80,7 @@ controls = dbc.Card(
 app.layout = dbc.Container(
     [
         html.H1("scGeneViewer", style={'textAlign': 'center'}),
-        html.Div(children=html.P([f"Data Visualizer for Wu C, Boey D, et al.", html.Br(),
-                                  f"Single-cell transcriptomics reveals the identity and regulators of human mast cell progenitors.", html.Br(),
-                                  f"Blood Adv. 2022;6(15):4439–4449. doi: 10.1182/bloodadvances.2022006969"]),
+        html.Div(children=html.P([f"Data Visualizer for Wu C, Boey D, et al."]),
                  style={
         'textAlign': 'center',
         }),
@@ -95,7 +93,22 @@ app.layout = dbc.Container(
                 'textAlign': 'center',
                 }),
         html.Br(),
-        html.Div(children='Developed by Daryl Boey, Team Dahlin, Karolinska Institutet', style={
+        html.Div([html.Button("Download annotated h5ad", id="btn_download_data"),
+                  dcc.Download(id="download_data")],
+                 style={'textAlign': 'center'}
+                 ),
+        html.Div(children='All figures and data are provided through a CC-BY 4.0 license, please cite the original article as referenced:', style={
+                'textAlign': 'center',
+                }),
+        html.Div(children=html.P([f"Wu C.*, Boey D.*, Bril O., Grootens J., Vijayabaskar M.S., Sorini C., Ekoff M., Wilson N.K., Ungerstedt J.S., Nilsson G. & J.S. Dahlin.",
+                                 html.Br(),f"Single-cell transcriptomics reveals the identity and regulators of human mast cell progenitors.",
+                                 html.Br(), f"Blood Advances, 6: 4439-4449 (2022)."]),
+                 style={
+            'textAlign': 'center',
+            'font-size' : '6'
+        }),
+        html.Div(children=['Developed by Daryl Boey, Team Dahlin, Karolinska Institutet, using Dash framework 2.1. Current version of dashboard available at ',
+                           dcc.Link('Github', href='https://github.com/boeydaryl/sc_geneviewer')], style={
         'textAlign': 'center',
         })
         ],
@@ -164,5 +177,17 @@ def update_graph(cat_data, gene_var, value_scale, value_input):
 
     return fig
 
+@app.callback(
+    Output("download_data", "data"),
+    Input("btn_download_data", "n_clicks"),
+    prevent_initial_call=True,
+)
+
+def func(n_clicks):
+    if n_clicks is not None:
+        return dcc.send_file(
+            "./data/Buffy210208_processed_labelled_9Nov23.h5ad"
+        )
+
 if __name__ == "__main__":
-    app.run_server(debug=False)
+    app.run_server(debug=True)
